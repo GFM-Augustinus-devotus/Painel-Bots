@@ -12,7 +12,7 @@ from Data_Base.QuiaboFrito import QuiaboFrito
 from Data_Base.DialogoBots import DialogoBots
 
 # — Variáveis do tema vindas do config.toml —
-PRIMARY = st.get_option("theme.primaryColor") or "#1DB954"
+PRIMARY  = st.get_option("theme.primaryColor") or "#1DB954"
 SURFACE  = st.get_option("theme.secondaryBackgroundColor") or "#181818"
 TEXT     = st.get_option("theme.textColor") or "#FFFFFF"
 
@@ -52,27 +52,8 @@ with SessionLocal() as session:
 #Diálogos dos Bots
 
     has_any = session.execute(select(DialogoBots.id).limit(1)).first() is not None
-
-    if not has_any:
-        session.add(DialogoBots(
-           nome = "Dra-Anelise-Agendamentos",
-           introducao = "Olá!👋 Seja bem-vindo(a) ao consultório da Dra. Anelise Daher. 😊",
-           pergunta1 = "Aqui é a Renata! Sou a assistente virtual da Dra. Anelise e estou aqui para facilitar o seu atendimento.",
-           pergunta2 = "Qual o nome do paciente? 📋",
-           pergunta3 = "Digite apenas o número da opção 📝",
-           pergunta4 = """1. (0 a 2 anos) 2. (3 a 5 anos) 3. (6 a 10 anos) 4. (Mais de 10 anos)""",
-           pergunta5 = "E você está buscando qual tipo de atendimento ",
-           pergunta6 = """ 1. Primeira consulta 2. Avaliação geral 3. Limpeza e prevenção 4. Retorno 5. Urgência""",
-           pergunta7 = "Para vocês o melhor período para agendarmos um horário com a Dra. Anelise? 👨‍⚕",
-           pergunta8 = """1. Manhã (9h-12h) 2. Tarde (14h-17h) 3. Indiferente Pode me contatar quando disponível""",
-           pergunta9 = "Entendido! ✅ Então vamos marcar a aconsulta do(a) Luiza !",
-           pergunta10 = "Conte-me, você já é paciente da Dra. Anelise? 📌", 
-           pergunta11 = " 1. Já sou paciente 2. Quero ser paciente",
-           pergunta12 = "Entendi! 💬 É importante que você saiba que estará em boas mãos! A Dra Anelise é a Odontopediatra com mais experiência e Goiânia.📍"
-        ))
-
-        session.commit()
-
+    if has_any:
+        print("Dialogos prontos para serem usados")
 # Dra. Anelise
 
     usuario_col_dra = "nomeUsuario"
