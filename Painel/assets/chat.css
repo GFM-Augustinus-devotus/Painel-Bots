@@ -1,0 +1,49 @@
+/* assets/chat.css */
+
+/* Usa variáveis definidas no main.py:
+   --bubble-user-bg, --bubble-user-text, --bubble-bot-bg, --bubble-bot-text, --bubble-shadow
+*/
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  margin-top: .25rem;
+}
+
+.chat-row {
+  display: flex;
+  align-items: flex-end;
+}
+
+.chat-row.user { justify-content: flex-end; }
+.chat-row.bot  { justify-content: flex-start; }
+
+.bubble {
+  max-width: 85%;
+  padding: .65rem .85rem;
+  border-radius: 16px;
+  box-shadow: var(--bubble-shadow);
+  line-height: 1.35;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.bubble.user {
+  background: var(--bubble-user-bg);
+  color: var(--bubble-user-text);
+  border-bottom-right-radius: 6px;
+}
+
+.bubble.bot {
+  background: var(--bubble-bot-bg);
+  color: var(--bubble-bot-text);
+  border-bottom-left-radius: 6px;
+}
+
+.meta {
+  font-size: .75rem;
+  opacity: .75;
+  margin-top: .2rem;
+}
