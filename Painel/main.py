@@ -52,8 +52,6 @@ with SessionLocal() as session:
 #Diálogos dos Bots
 
     has_any = session.execute(select(DialogoBots.id).limit(1)).first() is not None
-    if has_any:
-        print("Dialogos prontos para serem usados")
 # Dra. Anelise
 
     usuario_col_dra = "nomeUsuario"
