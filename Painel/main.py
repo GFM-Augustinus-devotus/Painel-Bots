@@ -11,38 +11,6 @@ from Data_Base.DraAnelise import DraAneliseAgendamento
 from Data_Base.QuiaboFrito import QuiaboFrito
 from Data_Base.DialogoBots import DialogoBots
 
-# — Variáveis do tema vindas do config.toml —
-PRIMARY  = st.get_option("theme.primaryColor") or "#1DB954"
-SURFACE  = st.get_option("theme.secondaryBackgroundColor") or "#181818"
-TEXT     = st.get_option("theme.textColor") or "#FFFFFF"
-
-# — Injeta as variáveis CSS no :root (cores do tema) —
-st.markdown(
-    f"""
-    <style>
-      :root {{
-        --bubble-user-bg: {PRIMARY};
-        --bubble-user-text: #FFFFFF;
-        --bubble-bot-bg: {SURFACE};
-        --bubble-bot-text: {TEXT};
-        --bubble-shadow: 0 4px 14px rgba(0,0,0,.18);
-      }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# — Carrega o arquivo externo de CSS —
-def load_css(path: str):
-    p = Path(path)
-    if p.exists():
-        st.markdown(f"<style>{p.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
-    else:
-        st.warning(f"Arquivo CSS não encontrado: {path}")
-
-load_css("assets/chat.css")
-
-
 # cria as tabelas (se não existirem)
 Base.metadata.create_all(bind=engine)
 insp = inspect(engine)
@@ -52,6 +20,7 @@ with SessionLocal() as session:
 #Diálogos dos Bots
 
     has_any = session.execute(select(DialogoBots.id).limit(1)).first() is not None
+
 # Dra. Anelise
 
     usuario_col_dra = "nomeUsuario"
@@ -85,7 +54,13 @@ with SessionLocal() as session:
     nomeUsuarioQuiaboFrito = list(dict.fromkeys(nomeUsuarioQuiaboFrito))
 
 
-#Diálogos entre o usuário 
+# — Carrega o arquivo externo de CSS —
+def load_css(path: str):
+    p = Path(path)
+    if p.exists():
+        st.markdown(f"<style>{p.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
+    else:
+        st.warning(f"Arquivo CSS não encontrado: {path}")
 
 # --- HELPER PARA EXIBIR TRECHO DE CONVERSA ---
 
@@ -114,7 +89,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
             return "user"
         if a in {"bot", "assistente", "sistema", "ai", "atendente", "robô", "robo", "renata"}:
             return "bot"
-        # fallback: se há texto no autor, tratamos como user; vazio -> bot
         return "user" if a else "bot"
 
     def _emit_balloons(eventos):
@@ -127,7 +101,7 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
             if ts is not None and str(ts).strip():
                 try:
                     if hasattr(ts, "strftime"):
-                        ts_txt = ts.strftime("%d/%m/%Y %H:%M")
+                        ts_txt = ts.strftime("%d/%m/%Y %H:%M") #Retorna o horário da mensagem
                     else:
                         ts_txt = str(ts)
                 except Exception:
@@ -138,6 +112,7 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
                   <div class="bubble {role}">
                     {escape(str(msg))}
                     <div class="meta">{escape(str(autor_txt))}{(' · ' + escape(str(ts_txt))) if ts_txt else ''}</div>
+                    {load_css("assets/chat.css")}
                   </div>
                 </div>
                 """,
@@ -145,7 +120,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
             )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Tenta ordenar por tempo se existir coluna temporal
     if ts_col is not None:
         try:
             sub[ts_col] = pd.to_datetime(sub[ts_col], errors="coerce")
@@ -166,7 +140,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
         if eventos:
             _emit_balloons(eventos)
             return
-        # se tinha msg_col, mas todas vazias, cai para os próximos modos
 
     # ---------- 2) Esquema 'largo' perguntaN/respostaN ----------
     # Procura colunas tipo pergunta1, pergunta_1, resposta1, resposta_1...
@@ -185,7 +158,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
             respostas[int(m.group(1))] = c
 
     if perguntas or respostas:
-        # Considera a primeira linha do usuário (mais comum nesse esquema)
         row0 = sub.iloc[0]
         eventos = []
         for i in sorted(set(list(perguntas.keys()) + list(respostas.keys()))):
@@ -216,7 +188,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
 
     if bot_cols or user_cols:
         row0 = sub.iloc[0]
-        # Intercala por índice quando possível
         max_len = max(len(bot_cols), len(user_cols))
         eventos = []
         for i in range(max_len):
@@ -235,8 +206,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
     # ---------- 4) Fallback ----------
     st.info("Não encontrei coluna de mensagens neste formato. Mostrando os registros do usuário.")
     st.dataframe(sub)
-    # (se quiser depurar, descomente:)
-    # st.caption(f"Colunas: {list(sub.columns)}")
 
 #---------------------------
 # Front-End ----> Streamlit
@@ -248,37 +217,44 @@ if "Dra-Anelise-Agendamentos" in tabelas:
     st.write("""## Dra. Anelise""")
     st.write(f"""### Usuários em contato com o Bot: {totalDraAnelise}""")
     st.write(f"""### Usuários que responderam todas as perguntas: {todasRespostasDraAnelise}""")
-    #st.write("""### Clientes Convertidos: """)
     usuarioDraAnelise = st.selectbox("Escolha um usuário", options=nomeUsuarioDraAnelise, index=None, placeholder="...")
-    st.subheader("--------------------------------------------")
-    #st.dataframe(dfDraAnelise)
 
     # --- ABAS para o usuário selecionado (Dra. Anelise) ---
-if usuarioDraAnelise:  # usando a MESMA variável já existente no seu código
-    # detectar nome da coluna do usuário
+if usuarioDraAnelise:  
     usuario_col_dra = next((c for c in ["nomeUsuario", "nome_usuario", "nome usuário"] if c in dfDraAnelise.columns), None)
     if usuario_col_dra:
         aba_resumo_dra, aba_conversa_dra = st.tabs(["Resumo", "Conversa"])
         with aba_resumo_dra:
             st.dataframe(dfDraAnelise.loc[dfDraAnelise[usuario_col_dra] == usuarioDraAnelise])
         with aba_conversa_dra:
-            mostrar_conversa(dfDraAnelise, usuario_col_dra, usuarioDraAnelise)
+            if "Dialogo-Bots" in tabelas:
+                dfDialogos = pd.read_sql_table("Dialogo-Bots", con=engine)
+
+                ren = {"Nome do Bot": "nome_bot", "Introdução": "pergunta0", "Registrado em": "timestamp"}
+                for n in range(1, 100):
+                    col = f"Pergunta {n}"
+                    if col in dfDialogos.columns:
+                        ren[col] = f"pergunta{n}"
+                dfDialogos = dfDialogos.rename(columns=ren)
+
+                bot_alvo = "Dra-Anelise-Agendamentos"
+
+                if bot_alvo in dfDialogos["nome_bot"].astype(str).unique():
+                    mostrar_conversa(dfDialogos, "nome_bot", bot_alvo)
+                else:
+                    st.warning(f"Não encontrei registros para o bot {bot_alvo}.")
     else:
         st.warning("Coluna de usuário não encontrada nesta tabela (procure por 'nome_usuario' ou 'nome usuário').")
-
 
 if "Quiabo-Frito" in tabelas:
     dfQuiaboFrito = pd.read_sql_table("Quiabo-Frito", con=engine)
     st.write("""## Quiabo Frito""")
     st.write(f"""### Usuários em contato com o Bot: {totalQuiaboFrito}""")
     st.write(f"""### Usuários que responderam todas as perguntas: {todasRespostasQuiaboFrito}""")
-    #st.write("""### Clientes Convervetidos: """)
     usuarioQuiaboFrito = st.selectbox("Escolha um usuário", options=nomeUsuarioQuiaboFrito, index=None, placeholder="...")
-    st.subheader("--------------------------------------------")
-    #st.dataframe(dfQuiaboFrito)
 
 # --- ABAS para o usuário selecionado (Quiabo Frito) ---
-if usuarioQuiaboFrito:  # mesma variável já usada por você
+if usuarioQuiaboFrito:
     usuario_col_qf = next((c for c in ["nomeUsuario", "Nome Usuário", "nome_usuario", "nome usuário"] if c in dfQuiaboFrito.columns), None)
     if usuario_col_qf:
         aba_resumo_qf, aba_conversa_qf = st.tabs(["Resumo", "Conversa"])
