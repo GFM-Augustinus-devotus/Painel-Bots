@@ -5,7 +5,6 @@ import re
 from html import escape
 from sqlalchemy import inspect, select, func
 from pathlib import Path
-from html import escape
 from Data_Base.db import engine, SessionLocal, Base
 from Data_Base.DraAnelise import DraAneliseAgendamento
 from Data_Base.QuiaboFrito import QuiaboFrito
@@ -17,9 +16,6 @@ insp = inspect(engine)
 tabelas = insp.get_table_names()
 
 with SessionLocal() as session:
-#Diálogos dos Bots
-
-    has_any = session.execute(select(DialogoBots.id).limit(1)).first() is not None
 
 # Dra. Anelise
 
@@ -28,8 +24,6 @@ with SessionLocal() as session:
     totalDraAnelise = session.scalar(select(func.count(DraAneliseAgendamento.id)))
 
     todasRespostasDraAnelise = session.scalar(select(func.count()).select_from(DraAneliseAgendamento).where(DraAneliseAgendamento.etapas.in_([2, 4]))) or 0
-
-    has_any = session.execute(select(DraAneliseAgendamento.id).limit(1)).first() is not None
 
     nomeUsuarioDraAnelise = session.scalars(select(DraAneliseAgendamento.nome_usuario)).all()
 
@@ -45,8 +39,6 @@ with SessionLocal() as session:
 
     todasRespostasQuiaboFrito = session.scalar(select(func.count()).select_from(QuiaboFrito).where(QuiaboFrito.etapa == 10)) or 0
 
-    has_any = session.execute(select(QuiaboFrito.id).limit(1)).first() is not None
-
     nomeUsuarioQuiaboFrito = session.scalars(select(QuiaboFrito.nome_usuario)).all()
 
     nomeUsuarioQuiaboFrito = [n.strip() for n in nomeUsuarioQuiaboFrito if isinstance(n, str) and n.strip()]
@@ -61,6 +53,8 @@ def load_css(path: str):
         st.markdown(f"<style>{p.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
     else:
         st.warning(f"Arquivo CSS não encontrado: {path}")
+
+
 
 # --- HELPER PARA EXIBIR TRECHO DE CONVERSA ---
 
@@ -112,7 +106,6 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
                   <div class="bubble {role}">
                     {escape(str(msg))}
                     <div class="meta">{escape(str(autor_txt))}{(' · ' + escape(str(ts_txt))) if ts_txt else ''}</div>
-                    {load_css("assets/chat.css")}
                   </div>
                 </div>
                 """,
@@ -212,6 +205,7 @@ def mostrar_conversa(df: pd.DataFrame, usuario_col: str, usuario_val):
 #---------------------------
 
 st.title("Painel de Análise dos Bots")
+load_css("assets/chat.css")
 if "Dra-Anelise-Agendamentos" in tabelas:
     dfDraAnelise = pd.read_sql_table("Dra-Anelise-Agendamentos", con=engine) 
     st.write("""## Dra. Anelise""")
