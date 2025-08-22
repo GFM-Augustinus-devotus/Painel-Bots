@@ -261,6 +261,22 @@ if usuarioQuiaboFrito:
         with aba_resumo_qf:
             st.dataframe(dfQuiaboFrito.loc[dfQuiaboFrito[usuario_col_qf] == usuarioQuiaboFrito])
         with aba_conversa_qf:
-            mostrar_conversa(dfQuiaboFrito, usuario_col_qf, usuarioQuiaboFrito)
+            if "Dialogo-Bots" in tabelas:
+                dfDialogos = pd.read_sql_table("Dialogo-Bots", con=engine)
+
+                ren = {"Nome do Bot": "nome_bot", "Introdução": "pergunta0", "Registrado em": "timestamp"}
+                for n in range(1, 100):
+                    col = f"Pergunta {n}"
+                    if col in dfDialogos.columns:
+                        ren[col] = f"pergunta{n}"
+                dfDialogos = dfDialogos.rename(columns=ren)
+
+                bot_alvo = "Quiabo-Frito"
+
+                if bot_alvo in dfDialogos["nome_bot"].astype(str).unique():
+                    mostrar_conversa(dfDialogos, "nome_bot", bot_alvo)
+                else:
+                    st.warning(f"Não encontrei registros para o bot {bot_alvo}.")
+            
     else:
         st.warning("Coluna de usuário não encontrada nesta tabela (procure por 'nome_usuario' ou 'nome usuário').")
