@@ -238,17 +238,17 @@ if usuarioDraAnelise:
                 else:
                     st.warning(f"Não encontrei registros para o bot {bot_alvo}.")
 
-            if "Resposta-Cliente" in tabelas:
-                dfResposta = pd.read_sql_table("Resposta-Cliente", con=engine)
-                reposta = {"Nome Cliente": "nome", "Mensagem Inicial": "inicio", "Registrado Em": "timestamp"}
-                for r in range(1,100):
-                    rcol = f"Pergunta {n}"
-                    if rcol in dfResposta.columns:
-                        ren[rcol] = f"pergunta{n}"
-                dfResposta = dfResposta.rename(columns=ren) #Posso usar a chave Bot e Intercalar as mensagens de pergunta e resposta
+            # if "Resposta-Cliente" in tabelas:
+            #     dfResposta = pd.read_sql_table("Resposta-Cliente", con=engine)
+            #     reposta = {"Nome Cliente": "nome", "Mensagem Inicial": "inicio", "Registrado Em": "timestamp"}
+            #     for r in range(1,100):
+            #         rcol = f"Pergunta {n}"
+            #         if rcol in dfResposta.columns:
+            #             ren[rcol] = f"pergunta{n}"
+            #     dfResposta = dfResposta.rename(columns=ren) #Posso usar a chave Bot e Intercalar as mensagens de pergunta e resposta
 
-                bot_alvo = "Resposta-Cliente"
-                mostrar_conversa(dfResposta, bot_alvo ,"Resposta-Cliente")
+            #     bot_alvo = "Resposta-Cliente"
+            #     mostrar_conversa(dfResposta, bot_alvo ,"Resposta-Cliente")
     else:
         st.warning("Coluna de usuário não encontrada nesta tabela (procure por 'nome_usuario' ou 'nome usuário').")
 
