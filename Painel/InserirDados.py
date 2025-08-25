@@ -1,65 +1,41 @@
+# InserirDados.py
 from sqlalchemy import select, inspect
 from Data_Base.db import SessionLocal, Base, engine
 from Data_Base.DraAnelise import DraAneliseAgendamento
 from Data_Base.RespostaClientes import RespostaCliente
-from Data_Base.DialogoBots import DialogoBots
+# from Data_Base.DialogoBots import DialogoBots  # se precisar
 
-#-------------------------------------
-
+# Cria as tabelas
 Base.metadata.create_all(bind=engine)
-insp = inspect(engine)
-tabelas = insp.get_table_names()
 
-#-------------------------------------- Fazendo para a Dra. Anelise
+# Só para ver as tabelas existentes
+insp = inspect(engine)
+print("Tabelas:", insp.get_table_names(schema="public"))
 
 with SessionLocal() as session:
-
+    # Itera pelos objetos já carregando os campos direto
     for item in session.scalars(select(DraAneliseAgendamento)):
+        # use diretamente os atributos do objeto
+        rc = RespostaCliente(
+            bot_key=1,
+            cliente_key=item.id,
+            nome=item.nome_usuario,
+            inicio=item.nome_paciente,
+            resposta1=str(item.idade_paciente) if item.idade_paciente is not None else None,
+            resposta2=item.motivo_consulta,
+            resposta3=item.hora_consulta,
+            resposta4=item.conhece_dra,
+            resposta5=item.etapas,
+            resposta6=item.obs,
+            # as demais ficam None por padrão
+        )
+        session.add(rc)
 
-        id_cliente = item.id
-        nome_usuario = session.scalar(select(DraAneliseAgendamento.nome_usuario).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        nome_paciente = session.scalar(select(DraAneliseAgendamento.nome_paciente).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        idade_paciente = session.scalar(select(DraAneliseAgendamento.idade_paciente).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        motivo_consulta = session.scalar(select(DraAneliseAgendamento.motivo_consulta).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        hora_consulta = session.scalar(select(DraAneliseAgendamento.hora_consulta).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        conhece_dra = session.scalar(select(DraAneliseAgendamento.conhece_dra).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        etapas = session.scalar(select(DraAneliseAgendamento.etapas).where(DraAneliseAgendamento.id.in_([id_cliente])))
-        obs = session.scalar(select(DraAneliseAgendamento.obs).where(DraAneliseAgendamento.id.in_([id_cliente])))
+    session.commit()
 
-        print(f"Id: {id}\t | nome: {nome_usuario}")
-
-        session.add(RespostaCliente(
-        bot_key    = 1,
-        cliente_key= id_cliente,
-        nome       = nome_usuario,
-        inicio     = nome_paciente,
-        resposta1  = idade_paciente,
-        resposta2  = motivo_consulta,
-        resposta3  = hora_consulta,
-        resposta4  = conhece_dra,
-        resposta5  = etapas,
-        resposta6  = obs,
-        resposta7  = "",
-        resposta8  = "",
-        resposta9  = "",
-        resposta10 = "",
-        resposta11 = "",
-        resposta12 = "",
-        resposta13 = "",
-        resposta14 = "",
-        resposta15 = "",
-        resposta16 = "",
-        resposta17 = "",
-        resposta18 = "",
-        resposta19 = "",
-        resposta20 = "",
-        resposta21 = "",
-        resposta22 = ""
-        ))
-
-        session.commit()
-
-has_any = session.execute(select(RespostaCliente.id).limit(1)).first() is not None
-
-if has_any:
-    print("Tabela RespostaCliente e dados inseridos corretamente, ver PgAdmin")
+    # Verifica se inseriu algo
+    has_any = session.execute(select(RespostaCliente.id).limit(1)).first() is not None
+    if has_any:
+        print("Tabela RespostaCliente e dados inseridos corretamente, ver PgAdmin")
+    else:
+        print("Erro no processo")

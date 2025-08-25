@@ -1,15 +1,24 @@
-from sqlalchemy import Column, String, Integer, TIMESTAMP, text, func, quoted_name, ForeignKey
-from .db import Base
+# Data_Base/RespostaClientes.py
+from sqlalchemy import Column, String, Integer, TIMESTAMP, text, func, ForeignKey
+from sqlalchemy.sql.elements import quoted_name
+from .db import Base  # garanta que Base é declarative_base()
 
-class RespostaCliente():
-    __tablename__ = "Resposta-Cliente"
-    __tableargs__ = {"scheme": "public"}
+class RespostaCliente(Base):
+    __tablename__ = quoted_name("Resposta-Cliente", True)  # tabela com hífen precisa de quote
+    __table_args__ = {"schema": "public"}
 
-    id         = Column(Integer, primary_key=True, autoincrement=True)
-    bot_key    = Column(quoted_name("Chave Bot", True), Integer, foreign_key=True)
-    cliente_key= Column(quoted_name("Chave Cliente", True), Integer, foreign_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Se você TIVER as tabelas 'bots' e 'clientes', descomente e ajuste:
+    # bot_key     = Column(quoted_name("Chave Bot", True), Integer, ForeignKey("bots.id"))
+    # cliente_key = Column(quoted_name("Chave Cliente", True), Integer, ForeignKey("clientes.id"))
+
+    # Se NÃO tiver FK (por enquanto), deixe só como Integer:
+    bot_key     = Column(quoted_name("Chave Bot", True), Integer, nullable=True)
+    cliente_key = Column(quoted_name("Chave Cliente", True), Integer, nullable=True)
+
     nome       = Column(quoted_name("Nome Cliente", True), String)
-    inicio     = Column(quoted_name("Mensagem Incial", True), String)
+    inicio     = Column(quoted_name("Mensagem Incial", True), String)  # cuidado: "Incial" está escrito assim no seu código
     resposta1  = Column(quoted_name("Resposta 1", True), String)
     resposta2  = Column(quoted_name("Resposta 2", True), String)
     resposta3  = Column(quoted_name("Resposta 3", True), String)
@@ -32,4 +41,10 @@ class RespostaCliente():
     resposta20 = Column(quoted_name("Resposta 20", True), String)
     resposta21 = Column(quoted_name("Resposta 21", True), String)
     resposta22 = Column(quoted_name("Resposta 22", True), String)
-    registrado_em = Column(quoted_name("Registrado Em", True), TIMESTAMP(timezone=True), server_default=text("(now() AT TIME ZONE 'America/Sao_Paulo'::text)"))
+
+    # Mais simples e correto para timestamptz:
+    registrado_em = Column(
+        quoted_name("Registrado Em", True),
+        TIMESTAMP(timezone=True),
+        server_default=func.now()
+    )
