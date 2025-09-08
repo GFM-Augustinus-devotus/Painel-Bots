@@ -238,17 +238,17 @@ if usuarioDraAnelise:
                 else:
                     st.warning(f"Não encontrei registros para o bot {bot_alvo}.")
 
-            # if "Resposta-Cliente" in tabelas:
-            #     dfResposta = pd.read_sql_table("Resposta-Cliente", con=engine)
-            #     reposta = {"Nome Cliente": "nome", "Mensagem Inicial": "inicio", "Registrado Em": "timestamp"}
-            #     for r in range(1,100):
-            #         rcol = f"Pergunta {n}"
-            #         if rcol in dfResposta.columns:
-            #             ren[rcol] = f"pergunta{n}"
-            #     dfResposta = dfResposta.rename(columns=ren) #Posso usar a chave Bot e Intercalar as mensagens de pergunta e resposta
+            if "Resposta-Cliente" in tabelas:
+                dfResposta = pd.read_sql_table("Resposta-Cliente", con=engine)
+                reposta = {"Nome Cliente": "nome", "Mensagem Inicial": "inicio", "Registrado Em": "timestamp"}
+                for r in range(1,100):
+                    rcol = f"Pergunta {n}"
+                    if rcol in dfResposta.columns:
+                        ren[rcol] = f"pergunta{n}"
+                dfResposta = dfResposta.rename(columns=ren) #Posso usar a chave Bot e Intercalar as mensagens de pergunta e resposta
 
-            #     bot_alvo = "Resposta-Cliente"
-            #     mostrar_conversa(dfResposta, bot_alvo ,"Resposta-Cliente")
+                bot_alvo = "Resposta-Cliente"
+                mostrar_conversa(dfResposta, bot_alvo ,"Resposta-Cliente")
     else:
         st.warning("Coluna de usuário não encontrada nesta tabela (procure por 'nome_usuario' ou 'nome usuário').")
 
@@ -262,27 +262,27 @@ if "Quiabo-Frito" in tabelas:
 # --- ABAS para o usuário selecionado (Quiabo Frito) ---
 if usuarioQuiaboFrito:
     usuario_col_qf = next((c for c in ["nomeUsuario", "Nome Usuário", "nome_usuario", "nome usuário"] if c in dfQuiaboFrito.columns), None)
-    if usuario_col_qf:
-        aba_resumo_qf, aba_conversa_qf = st.tabs(["Resumo", "Conversa"])
-        with aba_resumo_qf:
-            st.dataframe(dfQuiaboFrito.loc[dfQuiaboFrito[usuario_col_qf] == usuarioQuiaboFrito])
-        with aba_conversa_qf:
-            if "Dialogo-Bots" in tabelas:
-                dfDialogos = pd.read_sql_table("Dialogo-Bots", con=engine)
+    # if usuario_col_qf:
+    #     aba_resumo_qf, aba_conversa_qf = st.tabs(["Resumo", "Conversa"])
+    #     with aba_resumo_qf:
+    #         st.dataframe(dfQuiaboFrito.loc[dfQuiaboFrito[usuario_col_qf] == usuarioQuiaboFrito])
+    #     with aba_conversa_qf:
+    #         if "Dialogo-Bots" in tabelas:
+    #             dfDialogos = pd.read_sql_table("Dialogo-Bots", con=engine)
 
-                ren = {"Nome do Bot": "nome_bot", "Introdução": "pergunta0", "Registrado em": "timestamp"}
-                for n in range(1, 100):
-                    col = f"Pergunta {n}"
-                    if col in dfDialogos.columns:
-                        ren[col] = f"pergunta{n}"
-                dfDialogos = dfDialogos.rename(columns=ren)
+    #             ren = {"Nome do Bot": "nome_bot", "Introdução": "pergunta0", "Registrado em": "timestamp"}
+    #             for n in range(1, 100):
+    #                 col = f"Pergunta {n}"
+    #                 if col in dfDialogos.columns:
+    #                     ren[col] = f"pergunta{n}"
+    #             dfDialogos = dfDialogos.rename(columns=ren)
 
-                bot_alvo = "Quiabo-Frito"
+    #             bot_alvo = "Quiabo-Frito"
 
-                if bot_alvo in dfDialogos["nome_bot"].astype(str).unique():
-                    mostrar_conversa(dfDialogos, "nome_bot", bot_alvo)
-                else:
-                    st.warning(f"Não encontrei registros para o bot {bot_alvo}.")
+    #             if bot_alvo in dfDialogos["nome_bot"].astype(str).unique():
+    #                 mostrar_conversa(dfDialogos, "nome_bot", bot_alvo)
+    #             else:
+    #                 st.warning(f"Não encontrei registros para o bot {bot_alvo}.")
             
-    else:
-        st.warning("Coluna de usuário não encontrada nesta tabela (procure por 'nome_usuario' ou 'nome usuário').")
+    # else:
+    #     st.warning("Coluna de usuário não encontrada nesta tabela (procure por 'nome_usuario' ou 'nome usuário').")
